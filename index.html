@@ -87,6 +87,9 @@
             case "Fr":
               date="2016-01-08";
             break;
+            case "St":
+              date="2016-01-09";
+            break;
             default:
               return -3;
           }
@@ -197,7 +200,7 @@ function parse(){
   box = document.getElementById('box').value;
   //remove the icon placeholder text
   box = box.replace(/Academic Calendar Deadlines\n/g,"");
-  //remove white space from the beginning
+  //remove white space from the beginning 
   while(box.match(/^\n/g)){
     box = box.replace(/^\n/g,"");
   }
@@ -209,14 +212,26 @@ function parse(){
   //split into array
   data = box.split("\n");
 
+  //find any online courses and either remove them or put them on saturday at 11am
+  for(i = 0; i < data.length; i++){
+    if(data[i] == "ONLINE"){
+      if(document.getElementById('remove_online').checked){
+        data.splice(i-2, 3);
+      }  
+      else{
+        data.splice(i,0,"Sa 11:00AM - 1:00PM");
+        i++;
+      }
+    }
+  }
+  console.log(data);
   //check the size
   if (data.length%4!=0){
     alert("error. There are extra characters before/after the pasted info.");
     return -1;
   }
-
+  
   numClasses = data.length/4;
-
   //for each scheduled class
   for (i=0;i<numClasses;i++){
 
@@ -258,7 +273,6 @@ function parse(){
       return -2;
     }
   }
-
   handleAuthClick(event);
 }
     </script>
@@ -270,6 +284,11 @@ function parse(){
     Copy and paste the text schedule from the homepage of the <a href="https://campus.concordia.ca/psp/pscsprd/EMPLOYEE/HRMS/c/SA_LEARNER_SERVICES.SSS_STUDENT_CENTER.GBL">SIS student center</a> below, as seen here <img src="img/select.png" width="200px"><br> <textarea id="box" cols="60" rows="10"></textarea><br>
     Advanced users: Calendar ID:<input type="text" id="calId"></input> <a href="https://support.appmachine.com/hc/en-us/articles/203645966-Find-your-Google-Calendar-ID-for-the-Events-block">Click here</a> for a how to find a cal id. leave blank for default<br>
     <div id="authorize-div" style="display: inline"><br>
+      <form>
+        Should Online Courses be ignored or placed on the weekend?<br>
+        <input type="radio" name="online" id="remove_online" checked>Ignore Online Courses<br>
+        <input type="radio" name="online" id="weekend_online" >Place Online Courses on Weekend<br>
+      </form>
       <span>Build calendar and import it into google calendar</span>
       <!--Button for the user to click to initiate auth sequence -->
       <button id="authorize-button" onclick="parse()">
